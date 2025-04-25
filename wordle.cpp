@@ -40,38 +40,59 @@ void wordleHelper(
     set<string>& results,
     size_t index)
 {
-    if(index == curr.size()) // base case 1
+    size_t dashes = 0;
+
+    for(size_t i = index; i < curr.length(); ++i)
     {
-        if(dict.count(curr) && floating.empty())
-        {
-            results.insert(curr);
-        }
-        return;
+      if(curr[i] == '-')
+      {
+        dashes++; // count dashes
+      }
+    }
+
+    if(floating.length() > dashes)
+    {
+      return;
+    }
+
+    if(dashes == 0)
+    {
+      if(dict.find(curr) != dict.end() && (floating.size() == 0))
+      {
+        results.insert(curr);
+      }
+      return;
     }
 
     if(curr[index] != '-')
     {
-        wordleHelper(curr, floating, dict, results, index + 1);
+      wordleHelper(curr, floating, dict, results, index + 1);
+      return;
     }
 
     // place floating characters instead of alphabet at current position
-    for(size_t i = 0; i < floating.size(); ++i)
+    for(size_t i = 0; i < floating.length(); ++i)
     {
-        char c = floating[i];
-        string newFloating = floating;
-        newFloating.erase(i,1);
-        curr[index] = c;
-        wordleHelper(curr, newFloating, dict, results, index + 1);
+      char c = floating[i];
+      string remainFloat = floating;
+      remainFloat.erase(i,1);
+
+      string newCurr = curr;
+      newCurr[index] = c;
+
+      wordleHelper(newCurr, remainFloat, dict, results, index + 1);
     }
 
-    int remainDashes = count(curr.begin() + index, curr.end(), '-');
-    if(remainDashes > floating.size())
+    if(floating.length() < dashes)
     {
-        for(char c = 'a'; c <= 'z'; ++c)
-        {
-            if(floating.find(c) != string::npos) continue;
-            curr[index] = c;
-            wordleHelper(curr, floating, dict, results, index + 1);
-        }
+      for(char c ='a'; c <= 'z'; ++c)
+      {
+        if(floating.find(c) != string::npos) continue;
+
+        string newCurr = curr;
+        newCurr[index] = c;
+
+        wordleHelper(newCurr, floating, dict, results, index + 1);
+      }
     }
 }
