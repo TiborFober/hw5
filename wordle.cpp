@@ -15,7 +15,6 @@ using namespace std;
 // Add prototypes of helper functions here
 void wordleHelper(
     string curr,
-    const string& in,
     string floating,
     const set<string>& dict,
     set<string>& results,
@@ -29,47 +28,50 @@ std::set<std::string> wordle(
 {
     // Add your code here
     set<string> results;
-    wordleHelper("", in, floating, dict, results, 0);
+    wordleHelper(in, floating, dict, results, 0);
     return results;
 }
 
 // Define any helper functions here
 void wordleHelper(
     string curr,
-    const string& in,
     string floating,
     const set<string>& dict,
     set<string>& results,
     size_t index)
 {
-    if(index == in.size()) // base case 1
+    if(index == curr.size()) // base case 1
     {
-        if(floating.empty() && dict.find(curr) != dict.end())
+        if(dict.count(curr) && floating.empty())
         {
             results.insert(curr);
         }
         return;
     }
 
-    if(in[index] != '-')
+    if(curr[index] != '-')
     {
-        wordleHelper(curr + in[index], in, floating, dict, results, index + 1);
+        wordleHelper(curr, floating, dict, results, index + 1);
     }
-    else
+
+    // place floating characters instead of alphabet at current position
+    for(size_t i = 0; i < floating.size(); ++i)
     {
-        // try all 26 letters in alphabet
+        char c = floating[i];
+        string newFloating = floating;
+        newFloating.erase(i,1);
+        curr[index] = c;
+        wordleHelper(curr, newFloating, dict, results, index + 1);
+    }
+
+    int remainDashes = count(curr.begin() + index, curr.end(), '-');
+    if(remainDashes > floating.size())
+    {
         for(char c = 'a'; c <= 'z'; ++c)
         {
-            string newFloating = floating;
-
-            size_t pos = newFloating.find(c);
-            if(pos != string::npos)
-            {
-                newFloating.erase(pos, 1);
-
-            }
-
-            wordleHelper(curr + c, in, newFloating, dict, results, index + 1);
+            if(floating.find(c) != string::npos) continue;
+            curr[index] = c;
+            wordleHelper(curr, floating, dict, results, index + 1);
         }
     }
 }
